@@ -32,5 +32,7 @@ export interface MetricsSnapshot {
   runningTasks: number
   successRate: number
   avgLatency: number
+  minLatency: number
+  maxLatency: number
   nodeCount: number
 }

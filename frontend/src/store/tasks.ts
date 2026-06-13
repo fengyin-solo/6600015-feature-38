@@ -55,14 +55,20 @@ interface TaskStore {
 export const useTaskStore = create<TaskStore>((set, get) => ({
   tasks: mockTasks(initialNodes),
   nodes: initialNodes,
-  metrics: Array.from({ length: 20 }, (_, i) => ({
-    time: Date.now() - (20 - i) * 5000,
-    totalTasks: 100 + i * 2,
-    runningTasks: 3 + Math.floor(Math.random() * 5),
-    successRate: 85 + Math.random() * 14,
-    avgLatency: 500 + Math.random() * 2000,
-    nodeCount: 5,
-  })),
+  metrics: Array.from({ length: 20 }, (_, i) => {
+    const avg = 500 + Math.random() * 2000
+    const variance = 200 + Math.random() * 500
+    return {
+      time: Date.now() - (20 - i) * 5000,
+      totalTasks: 100 + i * 2,
+      runningTasks: 3 + Math.floor(Math.random() * 5),
+      successRate: 85 + Math.random() * 14,
+      avgLatency: avg,
+      minLatency: Math.max(100, avg - variance),
+      maxLatency: avg + variance + Math.random() * 1000,
+      nodeCount: 5,
+    }
+  }),
   selectedTask: null,
   addTask: (name) => {
     const task: Task = {
@@ -82,12 +88,16 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   selectTask: (t) => set({ selectedTask: t }),
   refreshNodes: () => set({ nodes: mockNodes() }),
   addMetric: () => {
+    const avg = 500 + Math.random() * 2000
+    const variance = 200 + Math.random() * 500
     const m: MetricsSnapshot = {
       time: Date.now(),
       totalTasks: get().tasks.length,
       runningTasks: get().tasks.filter(t => t.status === 'running').length,
       successRate: (get().tasks.filter(t => t.status === 'success').length / Math.max(get().tasks.length, 1)) * 100,
-      avgLatency: 500 + Math.random() * 2000,
+      avgLatency: avg,
+      minLatency: Math.max(100, avg - variance),
+      maxLatency: avg + variance + Math.random() * 1000,
       nodeCount: get().nodes.filter(n => n.status !== 'offline').length,
     }
     set({ metrics: [...get().metrics.slice(-30), m] })
